@@ -280,3 +280,50 @@
         ])];
         const viewSettings=(s)=>{const cfg=s.config||{};return [card("Settings",[
           el("p",{html:"Used by EIP-712 digest endpoint."}),
+          el("div",{class:"grid3"},[
+            inputRow("chain_id","setChainId",String(cfg.chain_id??""),true),
+            inputRow("verifying_contract","setVerifying",String(cfg.verifying_contract??""),true),
+            inputRow("domain_salt_hex","setSalt",String(cfg.domain_salt_hex??""),true),
+          ]),
+          el("div",{class:"actions"},[
+            el("button",{class:"btn btn-primary",onclick:async()=>{try{const payload={};if(val("setChainId"))payload.chain_id=val("setChainId");if(val("setVerifying"))payload.verifying_contract=val("setVerifying");if(val("setSalt"))payload.domain_salt_hex=val("setSalt");await window.CB_API.setConfig(payload);setOut({ok:true,saved:true})}catch(e){setOut({ok:false,error:String(e)})}}},["Save config"]),
+            el("button",{class:"btn",onclick:async()=>{try{setOut(await window.CB_API.loadConfig())}catch(e){setOut({ok:false,error:String(e)})}}},["Reload"]),
+          ]),
+          hr(),el("pre",{class:"out"},[JSON.stringify(cfg,null,2)]),
+        ])]};
+        const HELP_MD=[
+          "## ChowBueno quickstart",
+          "- Start the server: `python ChattaMucha/ChattaMucha.py`",
+          "- Open the UI: `http://127.0.0.1:8844/`",
+          "- Click `Random Draft`, then save the draft.",
+          "- Go to `Codec` to compute a capsuleId and build calldata.",
+          "",
+          "## Hashing mode",
+          "- If ChattaMucha has `web3`, selectors/ids are real keccak256.",
+          "- Otherwise they are `sha256-not-keccak` (not for mainnet txs).",
+          "",
+          "## Endpoints",
+          "```",
+          "GET  /api/health",
+          "GET  /api/drafts",
+          "POST /api/drafts/upsert",
+          "POST /api/capsule/preview",
+          "POST /api/codec/calldata",
+          "GET  /api/eip712/capsule_open_digest?draft_id=...&owner_nonce=...",
+          "```",
+        ].join("\n");
+        const viewHelp=()=>[card("Help",[
+          el("div",{class:"callout"},[el("div",{html:"<b>Heads up</b>: if health shows keccak=no, install web3 in the Python environment running ChattaMucha."})]),
+          hr(),el("div",{html:window.CB_MD.render(HELP_MD)}),
+        ])];
+        const render=(name,state)=>({dash:viewDash,drafts:viewDrafts,codec:viewCodec,eip712:viewEip712,activity:viewActivity,settings:viewSettings,help:viewHelp}[name]||(()=>[card("Not found",[el("p",{text:"Unknown view."})])]))(state);
+        const bindDraftActions=()=>{const up=$("btnUpsert"),pr=$("btnPreview"),oe=$("btnCallOpenETH"),ot=$("btnCallOpenToken");if(!up||!pr||!oe||!ot)return;
+          up.onclick=async()=>{try{const d=readDraft();const r=await window.CB_API.upsertDraft(d);setOut(r);fillDraft(r.draft)}catch(e){setOut({ok:false,error:String(e)})}};
+          pr.onclick=async()=>{try{const did=val("draftId");if(!did)throw new Error("Save draft first.");const r=await window.CB_API.previewDraft(did);setOut(r);location.hash="#/codec";window.CB_VIEWS.setCodecCapsule(r.preview.capsule_id.capsule_id_hex,did)}catch(e){setOut({ok:false,error:String(e)})}};
+          oe.onclick=async()=>{try{const did=val("draftId");if(!did)throw new Error("Save draft first.");setOut(await window.CB_API.callFromDraft(did,"openCapsuleETH",{}));location.hash="#/codec";window.CB_VIEWS.setCodecDraft(did)}catch(e){setOut({ok:false,error:String(e)})}};
+          ot.onclick=async()=>{try{const did=val("draftId");if(!did)throw new Error("Save draft first.");setOut(await window.CB_API.callFromDraft(did,"openCapsuleToken",{}));location.hash="#/codec";window.CB_VIEWS.setCodecDraft(did)}catch(e){setOut({ok:false,error:String(e)})}}};
+        const hydrateDraftList=(drafts)=>{const host=$("draftsList");if(!host)return;host.innerHTML="";for(const d of drafts||[])host.appendChild(draftCard(d))};
+        const setCodecCapsule=(capsuleId,draftId)=>{if($("codecCapsuleId"))$("codecCapsuleId").value=capsuleId||"";if($("codecDraftId"))$("codecDraftId").value=draftId||""};
+        const setCodecDraft=(draftId)=>{if($("codecDraftId"))$("codecDraftId").value=draftId||""};
+        window.CB_VIEWS={render,bindDraftActions,hydrateDraftList,prefill,fillDraft,readDraft,setCodecCapsule,setCodecDraft}})();
+      (()=>{const {$,setOut,copyText}=window.CB_UI;
