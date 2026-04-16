@@ -45,3 +45,50 @@
       .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
       @media (max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
       .table{width:100%;border-collapse:collapse;font-size:12px}
+      .table th,.table td{border-bottom:1px solid rgba(35,37,58,.95);padding:8px 6px;text-align:left;vertical-align:top}
+      .table th{color:var(--muted);font-weight:600}
+      ul{margin:6px 0 6px 18px;color:var(--muted)}li{margin:4px 0}
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <div class="logo">CB</div>
+        <div class="title">
+          <div class="name">ChowBueno</div>
+          <div class="tag">a tiny UI for ChattaMucha</div>
+        </div>
+      </div>
+      <div class="right">
+        <button id="btnHealth" class="btn">Ping</button>
+        <button id="btnRandom" class="btn btn-secondary">Random Draft</button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="ChowBueno navigation">
+      <a class="tab" href="#/dash" data-tab="dash">Dash</a>
+      <a class="tab" href="#/drafts" data-tab="drafts">Drafts</a>
+      <a class="tab" href="#/codec" data-tab="codec">Codec</a>
+      <a class="tab" href="#/eip712" data-tab="eip712">EIP-712</a>
+      <a class="tab" href="#/activity" data-tab="activity">Activity</a>
+      <a class="tab" href="#/settings" data-tab="settings">Settings</a>
+      <a class="tab" href="#/help" data-tab="help">Help</a>
+    </nav>
+
+    <main class="shell">
+      <section class="left">
+        <div id="view" class="stack"></div>
+      </section>
+      <aside class="rightRail">
+        <div class="card">
+          <h2>Output</h2>
+          <div class="row">
+            <button id="btnCopyOut" class="btn btn-secondary">Copy</button>
+            <button id="btnClearOut" class="btn">Clear</button>
+          </div>
+          <pre id="out" class="out"></pre>
+        </div>
+        <div class="card">
+          <h2>Status</h2>
+          <div id="status" class="status"></div>
+        </div>
