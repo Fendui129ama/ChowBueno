@@ -327,3 +327,50 @@
         const setCodecDraft=(draftId)=>{if($("codecDraftId"))$("codecDraftId").value=draftId||""};
         window.CB_VIEWS={render,bindDraftActions,hydrateDraftList,prefill,fillDraft,readDraft,setCodecCapsule,setCodecDraft}})();
       (()=>{const {$,setOut,copyText}=window.CB_UI;
+        const parseHash=()=>{const h=(location.hash||"#/dash").replace(/^#/,"");const [path,q]=h.split("?");const parts=path.split("/").filter(Boolean);const view=parts[0]||"dash";const qs=new URLSearchParams(q||"");const params={};for(const[k,v]of qs.entries())params[k]=v;return{view,params}};
+        const setActive=(view)=>{document.querySelectorAll(".tab").forEach(a=>{const t=a.getAttribute("data-tab");if(t===view)a.classList.add("active");else a.classList.remove("active")})};
+        const renderCurrent=()=>{const s=window.CB_STATE.snapshot();const {view}=parseHash();window.CB_STATE.set({lastView:view});setActive(view);
+          const host=$("view");host.innerHTML="";for(const n of window.CB_VIEWS.render(view,s))host.appendChild(n);
+          if(view==="drafts"){window.CB_VIEWS.bindDraftActions();window.CB_VIEWS.hydrateDraftList(s.drafts||[])}};
+        const start=()=>{window.addEventListener("hashchange",()=>renderCurrent());
+          window.CB_STATE.on((s)=>{const st=$("status");if(st){const ke=s.health?.hashing?.keccak_available;const busy=s.busy||0;const lines=[];lines.push(`busy: ${busy}`);if(s.health)lines.push(`keccak_available: ${!!ke}`);if(s.config)lines.push(`chain_id: ${s.config.chain_id}`);if(s.drafts)lines.push(`drafts: ${s.drafts.length}`);st.textContent=lines.join("\n")}
+            const cur=parseHash().view;if(["dash","drafts","codec","settings"].includes(cur))renderCurrent()});
+          renderCurrent()};
+        window.CB_ROUTER={start,parseHash,renderCurrent};
+        (async()=>{$("btnHealth").onclick=async()=>{try{setOut(await window.CB_API.loadHealth())}catch(e){setOut({ok:false,error:String(e)})}};
+          $("btnRandom").onclick=async()=>{try{const r=await window.CB_API.randomDraft();setOut(r);location.hash="#/drafts";window.CB_VIEWS.prefill(r)}catch(e){setOut({ok:false,error:String(e)})}};
+          $("btnCopyOut").onclick=async()=>{const ok=await copyText($("out").textContent||"");if(!ok)setOut({ok:false,error:"clipboard blocked"})};
+          $("btnClearOut").onclick=()=>setOut("");
+          try{await window.CB_API.loadHealth()}catch{}try{await window.CB_API.loadConfig()}catch{}try{await window.CB_API.loadDrafts()}catch{}
+          start();setOut("Ready. Use the tabs above.")})()})();}
+    </script>
+
+    <!--
+      ChowBueno Field Manual (embedded, single-file)
+      ------------------------------------------------
+      This block intentionally lives inside the HTML so the interface remains usable
+      even when copied as a single file.
+
+      Notes:
+      - If `keccak_available` is false in Dash, install web3 in the environment running ChattaMucha.
+      - For mainnet use, ensure keccak is available or selectors/calldata will not be correct.
+      - This UI does not transmit transactions. It generates deterministic values you can paste into a wallet.
+    -->
+
+    <template id="cb-manual">
+      <pre class="out">
+ChowBueno — Embedded Manual (offline-friendly)
+=============================================
+
+SECTION A — QUICK START
+  A01) Start server: python ChattaMucha/ChattaMucha.py
+  A02) Open UI: http://127.0.0.1:8844/
+  A03) Dash → confirm keccak_available true (recommended)
+  A04) Drafts → Random Draft → Save draft
+  A05) Drafts → Preview capsule id (sets you up for Codec)
+  A06) Codec → Build calldata from draft → paste into wallet “data”
+
+SECTION B — WHAT YOU ARE GENERATING
+  B01) capsuleId: contract-side keccak256(abi.encodePacked(...))
+  B02) selector: first 4 bytes of keccak256("fn(types)")
+  B03) calldata: selector + ABI-encoded arguments (fixed words here)
