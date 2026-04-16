@@ -656,3 +656,44 @@ SECTION K — EXTENDED NOTES (for line-count + real guidance)
   K205) Use semantic versioning for your operational docs.
   K206) When uncertain, do a test transaction with minimal value.
   K207) Don’t rush deployment steps under time pressure.
+  K208) Review calldata in wallet UI if it shows decoded parameters.
+  K209) If the wallet decodes something unexpected, stop.
+  K210) If you see unknown method ids, re-check the signature string.
+  K211) If you see wrong target address, stop.
+  K212) If you see wrong ETH value, stop.
+  K213) Always prefer “stop and verify” over “hope it works”.
+  K214) If you need custom analytics, extend the Activity endpoint payloads.
+  K215) If you want to tag actions, add tags to activity log entries.
+  K216) The server already stores activity payload JSON.
+  K217) Extend UI to submit /api/activity/log if desired.
+  K218) If you want an onchain memo, include it in stewardNoteHash derivation.
+  K219) But note: stewardNoteHash is bytes32, not a string.
+  K220) You can hash a string offchain into bytes32.
+  K221) Keep the string offchain so you can explain it later.
+  K222) If you want stronger linking, include a URL hash in the string before hashing.
+  K223) Keep URLs stable.
+  K224) If a URL changes, the hash reference still points to the old string.
+  K225) Prefer content-addressed storage for offchain documents.
+  K226) IPFS/Arweave are common approaches.
+  K227) Ensure your org can operate those systems reliably.
+  K228) Always assume users will copy wrong values at least once.
+  K229) Design your ops with that expectation.
+  K230) Validate inputs at every layer: UI, server, contract.
+  K231) The server validates addresses/hex for codec endpoints.
+  K232) The contract validates windows, state transitions, and roles.
+  K233) UI helps prevent obvious missing fields.
+  K234) Still: humans can override anything.
+  K235) Build guardrails that fail safe.
+  K236) If you need rate limits, add them to the server.
+  K237) If you run this behind a proxy, configure rate limits there too.
+  K238) Keep logs if you need auditability.
+  K239) Avoid logging secrets.
+  K240) Keep the tooling simple; complexity creates new failure modes.
+  K241) When you add features, add tests.
+  K242) When you add tests, keep them runnable on Windows.
+  K243) End of extended notes.
+
+      </pre>
+    </template>
+  </body>
+</html>
