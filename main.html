@@ -468,3 +468,50 @@ SECTION K — EXTENDED NOTES (for line-count + real guidance)
   K017) When pasting calldata, ensure wallet expects hex with 0x prefix.
   K018) When using executePayout, ensure capsule is resolvable and not challenged.
   K019) If challenged, guardian must resolve before executePayout will proceed.
+  K020) Re-check timestamps if your system clock is skewed.
+  K021) If a draft stores timestamps far in the future, contract will enforce time rules.
+  K022) If your bounty is too small, contract minBounty may revert if configured.
+  K023) If protocol fee is too high, governor config caps it.
+  K024) Use Settings tab to persist config values in server DB.
+  K025) If the UI looks stale, hard refresh (Ctrl+F5).
+  K026) If drafts don’t show, check /api/drafts in a new tab.
+  K027) If you see “bad_json”, ensure JSON fields are properly quoted.
+  K028) For manual calldata, types/values must be valid JSON arrays.
+  K029) Use bytes32 strings like "0x" + 64 hex chars.
+  K030) Use uint values as decimal strings or integers.
+  K031) Prefer generating calldata from a saved draft to reduce copy mistakes.
+  K032) If you must edit calldata manually, do it in small steps.
+  K033) Treat every onchain call as irreversible once mined.
+  K034) Use a hardware wallet for mainnet when possible.
+  K035) Keep a clean separation between testnet and mainnet configs.
+  K036) Never reuse a signed digest on a different chain id.
+  K037) Never reuse a signed digest with a different verifying contract.
+  K038) If you rotate stewards, note that old votes may still exist onchain.
+  K039) New proposals reset approvals in this contract’s logic.
+  K040) Challenge bonds are designed to discourage low-effort griefing.
+  K041) Set bond params conservatively; too high discourages honest challenges.
+  K042) If feeSink is a contract, ensure it can receive ETH (withdraw credits).
+  K043) The UI does not call withdraw for you; it only builds payloads.
+  K044) For withdrawETH, set `to` to an address you control.
+  K045) For withdrawToken, confirm token address is correct (no typos).
+  K046) If a token reverts on transfer, the withdraw will revert.
+  K047) Use “Activity” as a local audit trail for what you previewed/built.
+  K048) Local activity is not an onchain source of truth.
+  K049) Keep your own offchain records for compliance or accounting.
+  K050) Don’t assume the UI’s capsuleId equals contract capsuleId unless keccak is enabled.
+  K051) If keccak is disabled, selectors and digests are placeholders.
+  K052) If you deploy Ox_Futurino, fetch DOMAIN_SALT from the chain via a read call.
+  K053) Paste that DOMAIN_SALT into Settings for correct digest previews.
+  K054) If you don’t use signature-based opens, you can ignore EIP-712 tab.
+  K055) Signature-based opens require accurate ownerNonce.
+  K056) ownerNonce is stored onchain; read it before signing.
+  K057) This UI does not read chain state directly.
+  K058) Add a chain read module only if you accept the dependency + RPC requirement.
+  K059) For capsule open windows, avoid extremely short challenge windows.
+  K060) For high value bounties, consider longer challenge windows.
+  K061) For low value bounties, challenge bonds may be unnecessary friction.
+  K062) If you plan to rely on the bond path, configure min/max bond carefully.
+  K063) If you don’t want bond economics, use the non-bond challenge method.
+  K064) Guardian resolution is centralized by design; be explicit with users.
+  K065) If you want decentralized resolution, you’d need a different architecture.
+  K066) The contract uses pull-payments to reduce external call surface.
