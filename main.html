@@ -562,3 +562,50 @@ SECTION K — EXTENDED NOTES (for line-count + real guidance)
   K111) WAL mode improves concurrency but still has limits.
   K112) If you move the folder, the DB moves with it.
   K113) If you delete the DB, drafts are gone.
+  K114) Consider exporting drafts to JSON for backup.
+  K115) If you want an export endpoint, add it to ChattaMucha.
+  K116) This single-file UI is intentionally dependency-free.
+  K117) If you add a framework, you’ll likely split files again.
+  K118) Keep this file as “portable mode” if you prefer.
+  K119) If you must embed images, inline SVG is preferred.
+  K120) Avoid large binary blobs inside HTML for performance.
+  K121) The “Output” pane is your scratchpad; copy from there.
+  K122) The “Status” pane is a quick heartbeat.
+  K123) If status shows busy>0 for long periods, an API call is hung.
+  K124) Check DevTools network panel if needed.
+  K125) If your browser blocks mixed content, keep everything on http://127.0.0.1.
+  K126) Don’t expose ChattaMucha publicly without adding auth.
+  K127) This server has no authentication by default.
+  K128) Treat it as a local dev tool.
+  K129) If you must share, bind to localhost only.
+  K130) If you change host/port, update your bookmarks.
+  K131) If you run multiple instances, use different ports.
+  K132) If you want HTTPS, add a reverse proxy locally.
+  K133) Keep secrets out of drafts; drafts are stored in plaintext SQLite.
+  K134) Never paste private keys into this UI.
+  K135) Never paste seed phrases into this UI.
+  K136) Signing should happen inside your wallet tooling.
+  K137) The EIP-712 tab only computes digests; it does not sign.
+  K138) If your wallet expects typed data JSON, add a typed-data exporter (future enhancement).
+  K139) For now, you can sign the digest directly if your tool supports it.
+  K140) For EIP-712, prefer wallets that can display structured fields.
+  K141) If a wallet can’t display fields, triple-check the digest inputs.
+  K142) Always ensure ownerNonce matches onchain ownerNonces[owner].
+  K143) If you sign with wrong nonce, contract will reject.
+  K144) If you sign on wrong chain, contract will reject.
+  K145) If you sign for wrong contract address, contract will reject.
+  K146) That rejection is a safety feature.
+  K147) Keep a record of each signed digest used.
+  K148) Never reuse digests even if the tx fails.
+  K149) If you need idempotence, build it explicitly.
+  K150) For capsuleId, the openAt value is part of the hash in this contract.
+  K151) That means you cannot precompute capsuleId without knowing openAt.
+  K152) This UI uses an openAt you choose for local computation.
+  K153) When actually calling openCapsule*, the contract uses block.timestamp at execution.
+  K154) So the “real” capsuleId is only known after the open tx executes.
+  K155) Use preview ids for offchain tracking, not guaranteed onchain id.
+  K156) If you need deterministic ids before open, change the contract design.
+  K157) Alternative: use an explicit nonce field in capsule open and hash that instead.
+  K158) This version prioritizes simplicity and timestamp anchoring.
+  K159) Don’t rely on capsuleId prediction for critical workflow steps.
+  K160) Use events emitted by the chain as authoritative.
