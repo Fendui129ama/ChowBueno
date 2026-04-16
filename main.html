@@ -139,3 +139,50 @@
         const pill=(label,value,tone)=>el("span",{class:"pill"+(tone?` ${tone}`:"")},[el("span",{text:label+":"}),el("b",{text:String(value)})]);
         const card=(title,inner)=>el("section",{class:"card"},[el("h2",{text:title}),...(inner||[])]);
         const hr=()=>el("div",{class:"hr"});
+        const table=(rows,cols)=>{const thead=el("thead",null,[el("tr",null,cols.map(c=>el("th",{text:c.label})))]);
+          const tbody=el("tbody",null,rows.map(r=>el("tr",null,cols.map(c=>el("td",null,[c.render(r)])))));
+          return el("table",{class:"table"},[thead,tbody])};
+        const inputRow=(label,id,placeholder,mono)=>{const inp=el("input",{id,placeholder:placeholder||""});if(mono)inp.classList.add("mono");return el("label",null,[el("span",{text:label}),inp])};
+        window.CB_UI={$,el,card,hr,pill,table,inputRow,setOut,appendOut,copyText,fmtTime}})();
+      (()=>{const esc=(s)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+        const inline=(s)=>esc(s).replace(/`([^`]+)`/g,(_m,a)=>`<span class="kbd">${esc(a)}</span>`);
+        function render(md){const lines=String(md??"").replace(/\r\n/g,"\n").split("\n");let html="",inCode=false,codeBuf=[],inUl=false;
+          const flushUl=()=>{if(inUl){html+="</ul>";inUl=false}};const flushCode=()=>{if(!inCode)return;html+=`<pre class="out"><code>${esc(codeBuf.join("\n"))}</code></pre>`;inCode=false;codeBuf=[]};
+          for(const raw of lines){const line=raw.replace(/\t/g,"  ");if(line.trim().startsWith("```")){if(inCode)flushCode();else{flushUl();inCode=true;codeBuf=[]}continue}
+            if(inCode){codeBuf.push(raw);continue}
+            const h3=line.match(/^###\s+(.*)$/),h2=line.match(/^##\s+(.*)$/),h1=line.match(/^#\s+(.*)$/),b=line.match(/^\s*-\s+(.*)$/);
+            if(h3){flushUl();html+=`<h3>${inline(h3[1])}</h3>`;continue}
+            if(h2){flushUl();html+=`<h2 style="margin-top:10px">${inline(h2[1])}</h2>`;continue}
+            if(h1){flushUl();html+=`<h2 style="margin-top:10px">${inline(h1[1])}</h2>`;continue}
+            if(b){if(!inUl){html+="<ul>";inUl=true}html+=`<li>${inline(b[1])}</li>`;continue}
+            flushUl();if(!line.trim()){html+="<div style='height:8px'></div>";continue}
+            html+=`<p>${inline(line)}</p>`}
+          flushCode();flushUl();return html}
+        window.CB_MD={render}})();
+      (()=>{const {el,card,hr,pill,table,inputRow,setOut,fmtTime,$}=window.CB_UI;
+        const val=(id)=>(($(id)?.value??"").trim());const num=(id)=>{const v=parseInt(val(id)||"0",10);return Number.isFinite(v)?v:0};
+        const fillDraft=(d)=>{$("draftId").value=d.id||"";$("owner").value=d.owner_address||"";$("asset").value=d.asset_address||"";$("bounty").value=d.bounty_wei||"";$("contentHash").value=d.content_hash_hex||"";$("finalEarliest").value=d.final_earliest_at||"";$("finalLatest").value=d.final_latest_at||"";$("challengeLatest").value=d.challenge_latest_at||"";$("quorum").value=d.steward_quorum||"";$("notes").value=d.notes||""};
+        const readDraft=()=>({id:val("draftId")||undefined,owner_address:val("owner"),asset_address:val("asset"),bounty_wei:val("bounty")||"0",content_hash_hex:val("contentHash"),final_earliest_at:num("finalEarliest"),final_latest_at:num("finalLatest"),challenge_latest_at:num("challengeLatest"),steward_quorum:num("quorum"),notes:val("notes")});
+        const prefill=(r)=>fillDraft({id:"",owner_address:r.owner_address,asset_address:r.asset_address,bounty_wei:r.bounty_wei,content_hash_hex:r.content_hash_hex,final_earliest_at:r.final_earliest_at,final_latest_at:r.final_latest_at,challenge_latest_at:r.challenge_latest_at,steward_quorum:r.steward_quorum,notes:"randomized via /api/random"});
+        const draftCard=(d)=>{const id=d.id;return el("div",{class:"item"},[
+          el("div",{class:"k",text:"id"}),el("div",{class:"v mono",text:id}),
+          el("div",{class:"k",text:"owner"}),el("div",{class:"v mono",text:d.owner_address}),
+          el("div",{class:"k",text:"asset"}),el("div",{class:"v mono",text:d.asset_address}),
+          el("div",{class:"k",text:"bounty_wei"}),el("div",{class:"v mono",text:d.bounty_wei}),
+          el("div",{class:"k",text:"content_hash"}),el("div",{class:"v mono",text:d.content_hash_hex}),
+          el("div",{class:"k",text:"window"}),el("div",{class:"v",text:`${fmtTime(d.final_earliest_at)} → ${fmtTime(d.final_latest_at)} (challenge until ${fmtTime(d.challenge_latest_at)})`}),
+          el("div",{class:"mini"},[
+            el("button",{class:"btn btn-secondary",onclick:()=>{fillDraft(d);setOut({ok:true,loaded:id})}},["Load"]),
+            el("button",{class:"btn",onclick:async()=>{try{const r=await window.CB_API.previewDraft(id);setOut(r);location.hash="#/codec";window.CB_VIEWS.setCodecCapsule(r.preview.capsule_id.capsule_id_hex,id)}catch(e){setOut({ok:false,error:String(e)})}}},["Preview"]),
+            el("button",{class:"btn",onclick:async()=>{try{setOut(await window.CB_API.deleteDraft(id))}catch(e){setOut({ok:false,error:String(e)})}}},["Delete"]),
+          ]),
+        ])};
+        const draftForm=()=>el("div",{class:"form"},[
+          inputRow("Draft id (optional)","draftId","d_...",true),
+          el("div",{class:"grid2"},[
+            inputRow("Owner","owner","0x...",true),
+            inputRow("Asset (0x00..00 for ETH)","asset","0x000000...000",true),
+          ]),
+          inputRow("Bounty (wei as string)","bounty","1000000000000000",true),
+          inputRow("Content hash (hex)","contentHash","0x...",true),
+          el("div",{class:"grid3"},[
