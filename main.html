@@ -92,3 +92,50 @@
           <h2>Status</h2>
           <div id="status" class="status"></div>
         </div>
+      </aside>
+    </main>
+
+    <footer class="foot">
+      <div>Contract: <code>contracts/Ox_Futurino.sol</code></div>
+      <div>App: <code>ChattaMucha/ChattaMucha.py</code></div>
+      <div class="muted">UI: ChowBueno (hashing auto-detects keccak if `web3` is installed)</div>
+    </footer>
+
+    <script>
+      /* ChowBueno (single-file build). */
+      (()=>{const s={health:null,config:null,drafts:[],signatures:null,lastView:"dash",lastError:null,busy:0};const L=new Set();const snap=()=>JSON.parse(JSON.stringify(s));const set=(p)=>{Object.assign(s,p||{});for(const f of L){try{f(snap())}catch{}}};const on=(f)=>{L.add(f);f(snap());return()=>L.delete(f)};const busyStart=()=>{s.busy+=1;set({busy:s.busy})};const busyEnd=()=>{s.busy=Math.max(0,s.busy-1);set({busy:s.busy})};window.CB_STATE={snapshot:snap,set,on,busyStart,busyEnd}})();
+      (()=>{async function rj(r){const t=await r.text();try{return JSON.parse(t)}catch{return{raw:t}}}
+        async function get(p){window.CB_STATE.busyStart();try{const r=await fetch(p,{method:"GET"});const j=await rj(r);if(!r.ok)throw new Error(j?.error?.message||`HTTP ${r.status}`);return j}finally{window.CB_STATE.busyEnd()}}
+        async function post(p,pl){window.CB_STATE.busyStart();try{const r=await fetch(p,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(pl??{})});const j=await rj(r);if(!r.ok)throw new Error(j?.error?.message||`HTTP ${r.status}`);return j}finally{window.CB_STATE.busyEnd()}}
+        async function loadHealth(){const j=await get("/api/health");window.CB_STATE.set({health:j});return j}
+        async function loadConfig(){const j=await get("/api/config");window.CB_STATE.set({config:j.config});return j}
+        async function setConfig(partial){const j=await post("/api/config/set",partial);await loadConfig();return j}
+        async function loadDrafts(limit=100){const j=await get(`/api/drafts?limit=${encodeURIComponent(limit)}`);window.CB_STATE.set({drafts:j.drafts});return j}
+        const randomDraft=()=>get("/api/random");
+        async function upsertDraft(d){const j=await post("/api/drafts/upsert",d);await loadDrafts();return j}
+        async function deleteDraft(id){const j=await post("/api/drafts/delete",{id});await loadDrafts();return j}
+        const previewDraft=(draft_id,open_at)=>post("/api/capsule/preview",{draft_id,open_at});
+        const activity=(capsule_id,limit=200)=>get(`/api/activity?capsule_id=${encodeURIComponent(capsule_id)}&limit=${encodeURIComponent(limit)}`);
+        async function signatures(){const j=await get("/api/contract/signatures");window.CB_STATE.set({signatures:j.items});return j}
+        const selector=(signature)=>get(`/api/codec/selector?signature=${encodeURIComponent(signature)}`);
+        const calldata=(signature,types,values)=>post("/api/codec/calldata",{signature,types,values});
+        const callFromDraft=(draft_id,method,extra)=>post("/api/codec/contract_call_from_draft",{draft_id,method,...(extra||{})});
+        const capsuleId=(draft_id,open_at)=>get(`/api/codec/capsule_id?draft_id=${encodeURIComponent(draft_id)}&open_at=${encodeURIComponent(open_at||"")}`);
+        async function eip712OpenDigest(draft_id,owner_nonce,opts){const cfg=(window.CB_STATE.snapshot().config||{});const q=new URLSearchParams();q.set("draft_id",draft_id);q.set("owner_nonce",String(owner_nonce??"0"));
+          if(opts?.owner)q.set("owner",opts.owner);if(opts?.bounty_wei)q.set("bounty_wei",String(opts.bounty_wei));if(opts?.chain_id)q.set("chain_id",String(opts.chain_id));
+          if(opts?.verifying_contract)q.set("verifying_contract",opts.verifying_contract);if(opts?.domain_salt_hex)q.set("domain_salt_hex",opts.domain_salt_hex);
+          if(!q.get("chain_id")&&cfg.chain_id)q.set("chain_id",String(cfg.chain_id));
+          if(!q.get("verifying_contract")&&cfg.verifying_contract)q.set("verifying_contract",cfg.verifying_contract);
+          if(!q.get("domain_salt_hex")&&cfg.domain_salt_hex)q.set("domain_salt_hex",cfg.domain_salt_hex);
+          return get(`/api/eip712/capsule_open_digest?${q.toString()}`)}
+        window.CB_API={get,post,loadHealth,loadConfig,setConfig,loadDrafts,randomDraft,upsertDraft,deleteDraft,previewDraft,activity,signatures,selector,calldata,callFromDraft,capsuleId,eip712OpenDigest}})();
+      (()=>{const $=(id)=>document.getElementById(id);
+        const setOut=(obj)=>{const el=$("out");el.textContent=(typeof obj==="string")?obj:JSON.stringify(obj,null,2)};
+        const appendOut=(line)=>{const el=$("out");el.textContent=(el.textContent||"")+(el.textContent?"\n":"")+String(line)};
+        const copyText=async(text)=>{try{await navigator.clipboard.writeText(String(text||""));return true}catch{return false}};
+        const fmtTime=(ts)=>{if(!ts)return"";const d=new Date(Number(ts)*1000);if(Number.isNaN(d.getTime()))return String(ts);return d.toISOString().replace("T"," ").replace("Z"," UTC")};
+        const el=(tag,attrs,children)=>{const n=document.createElement(tag);if(attrs){for(const[k,v]of Object.entries(attrs)){if(k==="class")n.className=v;else if(k==="text")n.textContent=v;else if(k==="html")n.innerHTML=v;else if(k.startsWith("on")&&typeof v==="function")n.addEventListener(k.slice(2),v);else n.setAttribute(k,String(v))}}
+          if(children){for(const c of children){if(c==null)continue;if(typeof c==="string")n.appendChild(document.createTextNode(c));else n.appendChild(c)}}return n};
+        const pill=(label,value,tone)=>el("span",{class:"pill"+(tone?` ${tone}`:"")},[el("span",{text:label+":"}),el("b",{text:String(value)})]);
+        const card=(title,inner)=>el("section",{class:"card"},[el("h2",{text:title}),...(inner||[])]);
+        const hr=()=>el("div",{class:"hr"});
