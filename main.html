@@ -515,3 +515,50 @@ SECTION K — EXTENDED NOTES (for line-count + real guidance)
   K064) Guardian resolution is centralized by design; be explicit with users.
   K065) If you want decentralized resolution, you’d need a different architecture.
   K066) The contract uses pull-payments to reduce external call surface.
+  K067) Pull-payments mean users must take an extra withdraw step.
+  K068) That tradeoff is intentional for safety.
+  K069) If you want auto-push payouts, you must harden against reentrancy and token quirks.
+  K070) On mainnet, prefer well-behaved ERC20s (standard return values, no weird hooks).
+  K071) If you accept rebasing tokens, accounting can surprise you.
+  K072) If you accept fee-on-transfer tokens, bounty accounting may not match expectations.
+  K073) If you accept tokens with blacklists, transfers may fail later.
+  K074) In settings, keep verifying contract checksummed when possible.
+  K075) The Python backend will checksum if `web3` exists.
+  K076) Always verify the function signature string exactly.
+  K077) For overloaded functions, signature must include full types.
+  K078) Example: `withdrawETH(uint256,address)` not `withdrawETH(amount,to)`.
+  K079) Example: `executePayout(bytes32)` not `executePayout(id)`.
+  K080) `bytes32` values must be padded to 32 bytes; do not use short hashes.
+  K081) If you have a smaller hash, pad it offchain consistently or re-hash into bytes32.
+  K082) Use keccak256 offchain to convert arbitrary content to bytes32 if needed.
+  K083) For contentHash, treat it as an immutable commitment.
+  K084) Don’t publish private material in contentHash derivation if it can be brute forced.
+  K085) Use salting when hashing predictable content.
+  K086) Consider storing content offchain (IPFS/Arweave) and hashing the CID/manifest.
+  K087) If you use IPFS, remember CIDv0/v1 conversions can change string forms.
+  K088) Hash the raw bytes form consistently.
+  K089) The contract doesn’t interpret contentHash; it only anchors it.
+  K090) The stewardNoteHash can be used to reference an offchain decision log.
+  K091) Keep a steward decision log (even a simple shared doc) for transparency.
+  K092) If you need strict auditing, use signed steward notes offchain.
+  K093) If you need quorum guarantees beyond whitelist, add stake/slash mechanics (not here).
+  K094) The UI’s “Known signatures” list is curated, not inferred.
+  K095) If you add new contract methods, update the server endpoint to expose them.
+  K096) If you update the contract, redeploy and update verifying contract config.
+  K097) Never assume an address is correct because “it looks right”.
+  K098) Copy-paste errors are the most common failure mode.
+  K099) Always compare the first and last 6 hex chars of an address before sending.
+  K100) Use testnet dry runs for any new workflow.
+  K101) Use small value bounties when testing on mainnet.
+  K102) Gas spikes can occur; choose maxFee/maxPriority carefully.
+  K103) Don’t send transactions when your RPC provider is unstable.
+  K104) If you see inconsistent API behavior, restart ChattaMucha.
+  K105) If the UI doesn’t update, refresh; state updates are local and event-driven.
+  K106) If you have multiple browser tabs open, drafts can be edited in both.
+  K107) Treat drafts as “last write wins”.
+  K108) If you need concurrency control, add revision numbers (future enhancement).
+  K109) Keep backups of the SQLite DB if drafts matter to you.
+  K110) The DB file lives next to ChattaMucha.py.
+  K111) WAL mode improves concurrency but still has limits.
+  K112) If you move the folder, the DB moves with it.
+  K113) If you delete the DB, drafts are gone.
