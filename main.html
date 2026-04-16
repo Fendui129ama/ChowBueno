@@ -233,3 +233,50 @@
           ])];
         const viewCodec=(s)=>{const nodes=[];nodes.push(card("Codec",[el("p",{html:"Build capsule ids + calldata without broadcasting transactions."}),
             el("div",{class:"grid2"},[inputRow("Draft id","codecDraftId","d_...",true),inputRow("OpenAt (unix) used for capsuleId","codecOpenAt",String(Math.floor(Date.now()/1000)),true)]),
+            el("div",{class:"row wrap"},[
+              el("button",{class:"btn btn-primary",onclick:async()=>{try{const did=val("codecDraftId");const openAt=num("codecOpenAt")||Math.floor(Date.now()/1000);const r=await window.CB_API.capsuleId(did,openAt);setOut(r);$("codecCapsuleId").value=r.capsule_id.capsule_id_hex}catch(e){setOut({ok:false,error:String(e)})}}},["Compute capsuleId"]),
+              el("button",{class:"btn",onclick:async()=>{try{setOut(await window.CB_API.signatures())}catch(e){setOut({ok:false,error:String(e)})}}},["Load signatures"]),
+            ]),
+            hr(),
+            inputRow("Capsule id","codecCapsuleId","0x...",true),
+            el("div",{class:"grid2"},[inputRow("Method","codecMethod","openCapsuleETH",false),inputRow("Extra JSON","codecExtra","{}",true)]),
+            el("div",{class:"row wrap"},[
+              el("button",{class:"btn btn-secondary",onclick:async()=>{try{const did=val("codecDraftId");const m=val("codecMethod")||"openCapsuleETH";const extra=val("codecExtra");const parsed=extra?JSON.parse(extra):{};setOut(await window.CB_API.callFromDraft(did,m,parsed))}catch(e){setOut({ok:false,error:String(e)})}}},["Build calldata from draft"]),
+              el("button",{class:"btn",onclick:async()=>{try{const sig=val("codecSig");const types=JSON.parse(val("codecTypes")||"[]");const values=JSON.parse(val("codecValues")||"[]");setOut(await window.CB_API.calldata(sig,types,values))}catch(e){setOut({ok:false,error:String(e)})}}},["Build calldata (manual)"]),
+            ]),
+            hr(),
+            inputRow("Signature","codecSig","executePayout(bytes32)",true),
+            inputRow("Types JSON","codecTypes","[\"bytes32\"]",true),
+            inputRow("Values JSON","codecValues","[\"0x...\"]",true),
+          ]));
+          if(s.signatures){const rows=Object.entries(s.signatures).map(([k,v])=>({name:k,signature:v.signature,types:v.types}));
+            nodes.push(card("Known contract signatures",[table(rows,[
+              {label:"name",render:r=>el("span",{class:"mono",text:r.name})},
+              {label:"signature",render:r=>el("span",{class:"mono",text:r.signature})},
+              {label:"types",render:r=>el("span",{class:"mono",text:JSON.stringify(r.types)})},
+              {label:"use",render:r=>el("button",{class:"btn btn-secondary",onclick:async()=>{$("codecSig").value=r.signature;$("codecTypes").value=JSON.stringify(r.types);$("codecValues").value="[]";setOut({ok:true,selected:r.name});try{setOut(await window.CB_API.selector(r.signature))}catch{}}},["Pick"])},
+            ])])]))}
+          return nodes};
+        const viewEip712=()=>[card("EIP-712: CapsuleOpen digest",[
+          el("p",{html:"Compute the digest your wallet signs for <span class='kbd'>openCapsuleWithSigETH</span>/<span class='kbd'>openCapsuleWithSigToken</span>."}),
+          el("div",{class:"grid2"},[inputRow("Draft id","eipDraftId","d_...",true),inputRow("Owner nonce","eipOwnerNonce","0",true)]),
+          el("div",{class:"grid2"},[inputRow("Owner override (optional)","eipOwner","0x...",true),inputRow("Bounty override (optional)","eipBounty","",true)]),
+          el("div",{class:"grid3"},[inputRow("Chain id (optional)","eipChainId","",true),inputRow("Verifying contract (optional)","eipVerifying","",true),inputRow("Domain salt (optional)","eipSalt","",true)]),
+          el("div",{class:"actions"},[el("button",{class:"btn btn-primary",onclick:async()=>{try{
+            const did=val("eipDraftId");const nonce=val("eipOwnerNonce")||"0";const opts={};
+            if(val("eipOwner"))opts.owner=val("eipOwner");if(val("eipBounty"))opts.bounty_wei=val("eipBounty");
+            if(val("eipChainId"))opts.chain_id=val("eipChainId");if(val("eipVerifying"))opts.verifying_contract=val("eipVerifying");
+            if(val("eipSalt"))opts.domain_salt_hex=val("eipSalt");
+            setOut(await window.CB_API.eip712OpenDigest(did,nonce,opts))
+          }catch(e){setOut({ok:false,error:String(e)})}}},["Compute digest"])])
+        ])];
+        const viewActivity=()=>[card("Activity log",[
+          el("div",{class:"row wrap"},[inputRow("Capsule id","actCapsule","0x...",true),inputRow("Limit","actLimit","200",true)]),
+          el("div",{class:"actions"},[
+            el("button",{class:"btn btn-primary",onclick:async()=>{try{const cid=val("actCapsule");const lim=num("actLimit")||200;const r=await window.CB_API.activity(cid,lim);setOut(r);$("actOut").textContent=r.items.map(x=>`[${x.seq}] ${x.at} ${x.kind} ${JSON.stringify(x.payload)}`).join("\n")}catch(e){setOut({ok:false,error:String(e)})}}},["Load"]),
+            el("button",{class:"btn",onclick:()=>{$("actOut").textContent=""}},["Clear"]),
+          ]),
+          el("pre",{id:"actOut",class:"log"}),
+        ])];
+        const viewSettings=(s)=>{const cfg=s.config||{};return [card("Settings",[
+          el("p",{html:"Used by EIP-712 digest endpoint."}),
