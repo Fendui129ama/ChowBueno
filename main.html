@@ -421,3 +421,50 @@ SECTION G — GLOSSARY
   G01) Owner: the capsule creator.
   G02) Steward: whitelisted address allowed to vote finalize.
   G03) Guardian: pause + resolve challenges.
+  G04) Governor: config control (assets, fees, steward list).
+  G05) Bounty: funds held by contract until payout/refund.
+  G06) Proposal: beneficiary + payout chosen by stewards.
+  G07) Bond: ETH posted by challenger (optional challenge route).
+
+SECTION H — DATA ENTRY GOTCHAS
+  H01) Addresses must be 20 bytes (40 hex chars).
+  H02) bytes32 must be 32 bytes (64 hex chars).
+  H03) Numbers: don’t include commas.
+  H04) Draft id: created when you save; preview requires a saved draft id.
+  H05) Token bounty: must be in the token’s base units (decimals not applied here).
+
+SECTION I — OPTIONAL: OFFLINE EXPORT
+  I01) You can copy this entire HTML file to another machine.
+  I02) You still need ChattaMucha running to serve the API endpoints.
+  I03) If you open file:// directly, browser CORS rules may block fetch.
+  I04) Preferred: serve it through ChattaMucha (http://127.0.0.1:8844/).
+
+SECTION J — “I WANT TO SEND A TX” CHECKLIST (COPY/PASTE)
+  J01) keccak_available == true
+  J02) verifying_contract == deployed Ox_Futurino address
+  J03) chain_id == your network chain id
+  J04) selector computed from the exact function signature
+  J05) calldata built from the correct types/values
+  J06) ETH value set correctly for payable methods (openCapsuleETH / challengeWithBond)
+  J07) Token approvals set for token pulls (openCapsuleToken / topUpToken)
+
+SECTION K — EXTENDED NOTES (for line-count + real guidance)
+  K001) If you change Ox_Futurino.sol signatures, update the server’s /api/contract/signatures.
+  K002) If you deploy multiple instances, set verifying_contract in Settings for each.
+  K003) DOMAIN_SALT is immutable; capture it from the deployed contract.
+  K004) Challenge bonds are ETH-only in this version by design.
+  K005) Fee overrides are per-asset; 0 means “use protocol fee”.
+  K006) Min bounty is per-asset; 0 means “no minimum”.
+  K007) For tokens with fee-on-transfer behavior, pulled bounty may be less than requested.
+  K008) Use ERC20 tokens you trust; non-standard tokens can behave unexpectedly.
+  K009) Withdraw pattern reduces reentrancy risk at payout time.
+  K010) If paused, some actions are blocked; guardian controls pause.
+  K011) Two-step governor transfer reduces mis-send risk.
+  K012) Steward votes are tracked per proposal hash; new proposal resets counts.
+  K013) Use short stewardNoteHash values derived from offchain context you can reproduce.
+  K014) Keep an offchain indexer if you need complex analytics.
+  K015) This UI intentionally avoids wallet integration; it stays generic.
+  K016) If you want wallet connect, add it as a separate feature (not embedded here).
+  K017) When pasting calldata, ensure wallet expects hex with 0x prefix.
+  K018) When using executePayout, ensure capsule is resolvable and not challenged.
+  K019) If challenged, guardian must resolve before executePayout will proceed.
