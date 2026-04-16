@@ -186,3 +186,50 @@
           inputRow("Bounty (wei as string)","bounty","1000000000000000",true),
           inputRow("Content hash (hex)","contentHash","0x...",true),
           el("div",{class:"grid3"},[
+            inputRow("Final earliest (unix)","finalEarliest","",true),
+            inputRow("Final latest (unix)","finalLatest","",true),
+            inputRow("Challenge latest (unix)","challengeLatest","",true),
+          ]),
+          el("div",{class:"grid2"},[
+            inputRow("Steward quorum","quorum","2",true),
+            inputRow("Notes","notes","(optional)",false),
+          ]),
+          el("div",{class:"actions"},[
+            el("button",{id:"btnUpsert",class:"btn btn-primary"},["Save draft"]),
+            el("button",{id:"btnPreview",class:"btn"},["Preview capsule id"]),
+            el("button",{id:"btnCallOpenETH",class:"btn btn-secondary"},["Build calldata: openCapsuleETH"]),
+            el("button",{id:"btnCallOpenToken",class:"btn btn-secondary"},["Build calldata: openCapsuleToken"]),
+          ]),
+        ]);
+        const viewDash=(s)=>{const h=s.health,c=s.config,ke=h?.hashing?.keccak_available,b=s.busy||0;const nodes=[];
+          nodes.push(card("Dash",[
+            el("div",{class:"row wrap"},[pill("busy",b,b?"warn":""),pill("keccak",ke?"yes":"no",ke?"":"warn"),pill("drafts",(s.drafts||[]).length,"")]),
+            hr(),
+            el("div",{class:"callout"},[
+              el("div",{html:"<b>Flow</b>: create a draft → preview capsule id → generate calldata → use your wallet to send the tx."}),
+              el("div",{class:"muted",html:"This UI does not broadcast transactions. It helps you produce deterministic inputs."}),
+            ]),
+            hr(),
+            el("div",{class:"row wrap"},[
+              el("button",{class:"btn btn-primary",onclick:async()=>{try{setOut(await window.CB_API.loadHealth())}catch(e){setOut({ok:false,error:String(e)})}}},["Refresh health"]),
+              el("button",{class:"btn",onclick:async()=>{try{setOut(await window.CB_API.loadConfig())}catch(e){setOut({ok:false,error:String(e)})}}},["Refresh config"]),
+              el("button",{class:"btn btn-secondary",onclick:async()=>{try{const r=await window.CB_API.randomDraft();setOut(r);location.hash="#/drafts";prefill(r)}catch(e){setOut({ok:false,error:String(e)})}}},["Random draft"]),
+            ]),
+            hr(),
+            el("div",{class:"mono"},[
+              el("div",{text:"Contract: contracts/Ox_Futurino.sol"}),el("div",{text:"App: ChattaMucha/ChattaMucha.py"}),
+            ]),
+          ]));
+          if(h)nodes.push(card("Health",[el("pre",{class:"out"},[JSON.stringify(h,null,2)])]));
+          if(c)nodes.push(card("Config",[el("pre",{class:"out"},[JSON.stringify(c,null,2)])]));
+          return nodes};
+        const viewDrafts=(s)=>[card("Create / Update Draft",[draftForm(),hr(),el("div",{class:"row wrap"},[pill("tip","Save → Preview → Codec",""),pill("times","unix seconds","")])]),
+          card("Draft list",[
+            el("div",{class:"row wrap"},[
+              el("button",{class:"btn",onclick:async()=>{try{setOut(await window.CB_API.loadDrafts())}catch(e){setOut({ok:false,error:String(e)})}}},["Refresh"]),
+              el("button",{class:"btn btn-secondary",onclick:async()=>{try{const r=await window.CB_API.randomDraft();setOut(r);prefill(r)}catch(e){setOut({ok:false,error:String(e)})}}},["Random draft"]),
+            ]),
+            el("div",{id:"draftsList",class:"list"}),
+          ])];
+        const viewCodec=(s)=>{const nodes=[];nodes.push(card("Codec",[el("p",{html:"Build capsule ids + calldata without broadcasting transactions."}),
+            el("div",{class:"grid2"},[inputRow("Draft id","codecDraftId","d_...",true),inputRow("OpenAt (unix) used for capsuleId","codecOpenAt",String(Math.floor(Date.now()/1000)),true)]),
