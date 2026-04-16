@@ -609,3 +609,50 @@ SECTION K — EXTENDED NOTES (for line-count + real guidance)
   K158) This version prioritizes simplicity and timestamp anchoring.
   K159) Don’t rely on capsuleId prediction for critical workflow steps.
   K160) Use events emitted by the chain as authoritative.
+  K161) Index FuturinoCapsuleOpened events to track real capsule ids.
+  K162) Use FuturinoFinalizeVote events to track governance actions.
+  K163) Use FuturinoCapsuleResolved for challenge outcomes.
+  K164) Use FuturinoWithdrawal for accounting withdrawals.
+  K165) Always validate event logs against the correct contract address.
+  K166) If you deploy multiple instances, separate indexers by address.
+  K167) If you need subgraph support, add a Graph mapping (external).
+  K168) For small usage, a simple log scraper is enough.
+  K169) If a steward key is compromised, governor should remove steward quickly.
+  K170) If governor key is compromised, rotate governor via propose/accept (if possible).
+  K171) If guardian key is compromised, pause/unpause control is at risk.
+  K172) Consider using multisigs for governor/guardian roles in production.
+  K173) Multisigs reduce single-key risk.
+  K174) Multisigs may increase operational complexity.
+  K175) Document your role management policy.
+  K176) If you need time-delayed governance, add timelocks (future enhancement).
+  K177) This contract does not include a timelock by default.
+  K178) Timelocks can reduce admin risk at the cost of agility.
+  K179) If you need emergency exits, keep pause + conservative sweep patterns.
+  K180) Sweeps should be used carefully and transparently.
+  K181) The contract already includes paused sweep functions for dust.
+  K182) Do not treat sweep as a normal operational path.
+  K183) If you need full recoverability, redesign accounting.
+  K184) Avoid storing private user data onchain.
+  K185) Use hashes/commitments instead.
+  K186) If you use salts, store salt offchain securely.
+  K187) Consider threat model: can an attacker guess content from hash?
+  K188) If yes, hash isn’t privacy.
+  K189) For privacy, use commitments with randomness.
+  K190) For stronger privacy, use ZK designs (out of scope).
+  K191) If you want an audit, freeze code and document invariants.
+  K192) Use unit tests and fuzzing for critical path.
+  K193) Consider formal verification for high-value deployments.
+  K194) For now, keep bounties modest until proven.
+  K195) Gradually scale up.
+  K196) Keep incident response procedures written down.
+  K197) Keep contact channels for stewards/guardian.
+  K198) Run periodic key rotation drills.
+  K199) Verify backups.
+  K200) Keep chain explorers bookmarked for your contract.
+  K201) Keep ABI JSON accessible for your integration tooling.
+  K202) If you add new features, keep interfaces stable.
+  K203) If you break interfaces, version your UI and server endpoints.
+  K204) Make sure users know which version they are using.
+  K205) Use semantic versioning for your operational docs.
+  K206) When uncertain, do a test transaction with minimal value.
+  K207) Don’t rush deployment steps under time pressure.
