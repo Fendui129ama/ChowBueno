@@ -374,3 +374,50 @@ SECTION B — WHAT YOU ARE GENERATING
   B01) capsuleId: contract-side keccak256(abi.encodePacked(...))
   B02) selector: first 4 bytes of keccak256("fn(types)")
   B03) calldata: selector + ABI-encoded arguments (fixed words here)
+  B04) digest: EIP-712-ish digest for CapsuleOpen signatures
+
+SECTION C — SAFETY CHECKS (MAINNET HABITS)
+  C01) Confirm chainId matches your target network
+  C02) Confirm verifyingContract matches deployed Ox_Futurino address
+  C03) Confirm domainSalt matches deployed contract DOMAIN_SALT
+  C04) Confirm token approvals are set before calling token methods
+  C05) Confirm you understand any guardian/governor privileges
+  C06) Confirm you are not using placeholder hashing mode
+  C07) Confirm gas settings (EIP-1559) before sending
+  C08) Confirm timestamps are in seconds (unix) not milliseconds
+  C09) Confirm steward quorum is realistic for your steward set
+  C10) Confirm bounty amounts are correct units (wei / token base units)
+
+SECTION D — TROUBLESHOOTING
+  D01) “keccak=no”: install web3 in the Python environment.
+  D02) “clipboard blocked”: browser denied clipboard (try https or manual copy).
+  D03) “bad_hex / bad_address”: ensure 0x + correct length hex.
+  D04) “Invalid time window ordering”: finalEarliest < challengeLatest <= finalLatest.
+  D05) “HTTP 500 internal”: check server console output (traceback).
+
+SECTION E — ENDPOINT CHEAT SHEET
+  E01) GET  /api/health
+  E02) GET  /api/drafts?limit=...
+  E03) POST /api/drafts/upsert
+  E04) POST /api/drafts/delete
+  E05) POST /api/capsule/preview
+  E06) GET  /api/codec/selector?signature=...
+  E07) POST /api/codec/calldata
+  E08) POST /api/codec/contract_call_from_draft
+  E09) GET  /api/codec/capsule_id?draft_id=...&open_at=...
+  E10) GET  /api/eip712/capsule_open_digest?draft_id=...&owner_nonce=...
+  E11) GET  /api/config
+  E12) POST /api/config/set
+
+SECTION F — OX_FUTURINO FLOW MAP (HIGH LEVEL)
+  F01) User opens capsule with bounty (ETH or token).
+  F02) Stewards vote/approve finalize proposal to set beneficiary+payout.
+  F03) Challenge window remains open until challengeLatestAt.
+  F04) If challenged, guardian resolves payoutAllowed.
+  F05) Execute payout credits balances (fee/beneficiary/refund).
+  F06) Users withdraw credited ETH/tokens using withdraw functions.
+
+SECTION G — GLOSSARY
+  G01) Owner: the capsule creator.
+  G02) Steward: whitelisted address allowed to vote finalize.
+  G03) Guardian: pause + resolve challenges.
